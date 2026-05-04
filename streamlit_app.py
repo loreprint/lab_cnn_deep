@@ -611,6 +611,21 @@ def get_experiment_signature(experiments_dir: Path) -> tuple[str, ...]:
     return tuple(signature_parts)
 
 
+def resolve_model_path(model_metrics: dict | None) -> Path:
+    fallback = MODELS_DIR / "model.keras"
+    if not model_metrics:
+        return fallback
+
+    model_path_value = model_metrics.get("model_path")
+    if not model_path_value:
+        return fallback
+
+    candidate = Path(str(model_path_value))
+    if candidate.exists():
+        return candidate
+    return fallback
+
+
 def summarize_from_male_probability(male_probability: float) -> dict:
     male_probability = float(np.clip(male_probability, 0.0, 1.0))
     female_probability = 1.0 - male_probability
@@ -659,7 +674,7 @@ def build_demo_views(image: Image.Image) -> dict[str, dict]:
 
 
 def run_single_inference(model_metrics: dict, selected_view: dict) -> tuple[dict, dict]:
-    model = read_model(Path(model_metrics["model_path"]))
+    model = read_model(resolve_model_path(model_metrics))
     image_batch = prepare_image(selected_view["image"], image_size=IMAGE_SIZE)
     prediction = predict_probabilities(model, image_batch)
     anchor_vote = {
@@ -688,7 +703,7 @@ def run_robust_inference(experiment_registry: dict[str, dict], views: dict[str, 
         if metrics is None:
             continue
         selected_view = views[view_key]
-        model = read_model(Path(metrics["model_path"]))
+        model = read_model(resolve_model_path(metrics))
         image_batch = prepare_image(selected_view["image"], image_size=IMAGE_SIZE)
         prediction = predict_probabilities(model, image_batch)
         votes.append(
@@ -1392,7 +1407,7 @@ def main() -> None:
         st.sidebar.markdown("### Modelo activo en demo")
         if inference_mode == "Robusto (ensemble)":
             st.sidebar.write("Nombre: `robusto_ensemble`")
-            st.sidebar.write("Base: `face_crop_k5 + compact_k5_dropout + wider_k5_dropout`")
+            st.sidebar.write("Base: combinacion de checkpoints disponibles en el despliegue.")
             st.sidebar.write("Objetivo: reducir errores extremos en imagenes externas.")
         else:
             st.sidebar.write(f'Nombre: `{demo_metrics.get("name", "N/D")}`')
