@@ -14,7 +14,7 @@ Resolucion completa del laboratorio `Laboratorio_XAI_CNNs.pdf` con:
 - Entrenamiento de varios experimentos CNN.
 - Analisis de hiperparametros.
 - App web con seccion de informe y demo interactiva.
-- Documentacion lista para entrega.
+- Documentacion 
 
 ## Estado actual del laboratorio
 
@@ -59,7 +59,6 @@ cnn_xai_gender_lab/
 
 - Entregable manuscrito: [03_entregable_manuscrito.md](/C:/Users/lore7/Documents/Playground/cnn_xai_gender_lab/docs/03_entregable_manuscrito.md)
 - Guia de despliegue: [04_despliegue_streamlit_cloud.md](/C:/Users/lore7/Documents/Playground/cnn_xai_gender_lab/docs/04_despliegue_streamlit_cloud.md)
-- Checklist final: [06_checklist_entrega.md](/C:/Users/lore7/Documents/Playground/cnn_xai_gender_lab/docs/06_checklist_entrega.md)
 - Resumen de entrega: [07_entrega_final.md](/C:/Users/lore7/Documents/Playground/cnn_xai_gender_lab/docs/07_entrega_final.md)
 - Auditoria tecnica: [10_auditoria_modelo_y_datos.md](/C:/Users/lore7/Documents/Playground/cnn_xai_gender_lab/docs/10_auditoria_modelo_y_datos.md)
 
@@ -134,15 +133,7 @@ Recomendacion de prueba:
 - `outputs/interpretability/correct_prediction_panel.png`
 - `outputs/animations/cnn_architecture_manim.mp4`
 
-## Despliegue publico
 
-Tu modelo `models/model.keras` pesa mas de `100 MB`, asi que GitHub normal lo bloquea. Por eso este proyecto ya quedo preparado para:
-
-- subir `models/model.keras` con `Git LFS`;
-- mantener fuera del repo los checkpoints pesados de experimentos;
-- publicar la app en `Streamlit Community Cloud`.
-
-Sigue la guia paso a paso en [04_despliegue_streamlit_cloud.md](/C:/Users/lore7/Documents/Playground/cnn_xai_gender_lab/docs/04_despliegue_streamlit_cloud.md).
 
 ## Referencias oficiales usadas
 
