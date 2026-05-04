@@ -1,0 +1,7 @@
+{
+  "best_experiment": "wider_k5_dropout",
+  "best_model_path": "C:\\Users\\lore7\\Documents\\Playground\\cnn_xai_gender_lab\\models\\model.keras",
+  "test_accuracy": 0.9741697311401367,
+  "test_loss": 0.13371527194976807,
+  "test_auc": 0.9860203266143799
+}

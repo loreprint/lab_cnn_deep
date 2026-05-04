@@ -1,0 +1,23 @@
+{
+  "train": {
+    "count": 3788,
+    "classes": {
+      "female": 1920,
+      "male": 1868
+    }
+  },
+  "val": {
+    "count": 251,
+    "classes": {
+      "female": 108,
+      "male": 143
+    }
+  },
+  "test": {
+    "count": 251,
+    "classes": {
+      "female": 109,
+      "male": 142
+    }
+  }
+}

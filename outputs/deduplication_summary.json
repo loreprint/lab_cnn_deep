@@ -1,0 +1,6 @@
+{
+  "raw_images": 5418,
+  "unique_training_images": 1672,
+  "removed_duplicates": 3746,
+  "mean_duplicate_group_size": 3.2404306220095696
+}

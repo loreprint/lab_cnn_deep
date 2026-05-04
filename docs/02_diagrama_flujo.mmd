@@ -1,0 +1,13 @@
+flowchart LR
+    A["Dataset Kaggle"] --> B["data/female y data/male"]
+    B --> C["Lectura RGB"]
+    C --> D["Resize 224x224"]
+    D --> E["Normalizacion [0,1]"]
+    E --> F["Split 70/15/15"]
+    F --> G["CNN secuencial"]
+    G --> H["Prediccion binary sigmoid"]
+    G --> I["Saliency Map"]
+    G --> J["Grad-CAM"]
+    H --> K["App Streamlit"]
+    I --> K
+    J --> K

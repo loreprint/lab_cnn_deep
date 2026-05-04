@@ -1,0 +1,12 @@
+flowchart LR
+    A["Input 224x224x3"] --> B["Conv2D 32 filtros 3x3 ReLU"]
+    B --> C["MaxPooling2D 2x2"]
+    C --> D["Conv2D 64 filtros 3x3 ReLU"]
+    D --> E["MaxPooling2D 2x2"]
+    E --> F["Conv2D 128 filtros 3x3 ReLU"]
+    F --> G["MaxPooling2D 2x2"]
+    G --> H["Flatten"]
+    H --> I["Dense 128 ReLU"]
+    I --> J["Dropout 0.30"]
+    J --> K["Dense 1 sigmoid"]
+    K --> L["Salida binaria female o male"]

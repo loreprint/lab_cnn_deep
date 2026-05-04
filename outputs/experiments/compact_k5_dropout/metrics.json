@@ -1,0 +1,19 @@
+{
+  "name": "compact_k5_dropout",
+  "model_path": "C:\\Users\\lore7\\Documents\\Playground\\cnn_xai_gender_lab\\outputs\\experiments\\compact_k5_dropout\\model.keras",
+  "epochs_trained": 10,
+  "base_filters": 32.0,
+  "kernel_size": 5.0,
+  "dense_units": 96.0,
+  "dropout": 0.5,
+  "learning_rate": 0.0005000000237487257,
+  "accuracy": 0.7615384459495544,
+  "auc": 0.8276718258857727,
+  "loss": 0.5091881155967712,
+  "val_accuracy": 0.5298804640769958,
+  "val_auc": 0.6450725197792053,
+  "val_loss": 0.9169001579284668,
+  "test_accuracy": 0.6613546013832092,
+  "test_auc": 0.7664750218391418,
+  "test_loss": 0.6219871044158936
+}

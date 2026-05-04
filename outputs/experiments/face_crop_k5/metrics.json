@@ -1,0 +1,19 @@
+{
+  "name": "face_crop_k5",
+  "model_path": "C:\\Users\\lore7\\Documents\\Playground\\cnn_xai_gender_lab\\outputs\\experiments\\face_crop_k5\\model.keras",
+  "epochs_trained": 4,
+  "base_filters": 32.0,
+  "kernel_size": 5.0,
+  "dense_units": 128.0,
+  "dropout": 0.35,
+  "learning_rate": 0.0005000000237487257,
+  "accuracy": 0.7434002161026001,
+  "auc": 0.8230761289596558,
+  "loss": 0.5218722224235535,
+  "val_accuracy": 0.6215139627456665,
+  "val_auc": 0.6708430647850037,
+  "val_loss": 0.6612594127655029,
+  "test_accuracy": 0.6175298690795898,
+  "test_auc": 0.6951479911804199,
+  "test_loss": 0.6492534279823303
+}

@@ -1,0 +1,25 @@
+{
+  "num_images": 1672,
+  "classes": {
+    "female": 723,
+    "male": 949
+  },
+  "formats": {
+    "JPEG": 1628,
+    "PNG": 44
+  },
+  "width": {
+    "min": 194,
+    "max": 8675,
+    "mean": 924.2338516746412
+  },
+  "height": {
+    "min": 232,
+    "max": 7680,
+    "mean": 1154.1818181818182
+  },
+  "unique_compact_hashes": 1672,
+  "duplicate_rows": 0,
+  "duplicate_groups_retained": 1672,
+  "mean_duplicate_group_size": 3.2404306220095696
+}

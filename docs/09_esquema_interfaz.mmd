@@ -1,0 +1,15 @@
+flowchart TD
+    A["Usuario sube imagen"] --> B["App Streamlit"]
+    B --> C["Lectura RGB"]
+    C --> D["Imagen completa o recorte de rostro"]
+    D --> E["Resize 224x224"]
+    E --> F["Normalizacion [0,1]"]
+    F --> G["Modelo CNN"]
+    G --> H["Probabilidad female"]
+    G --> I["Probabilidad male"]
+    G --> J["Saliency Map"]
+    G --> K["Grad-CAM"]
+    H --> L["Panel de resultados"]
+    I --> L
+    J --> L
+    K --> L

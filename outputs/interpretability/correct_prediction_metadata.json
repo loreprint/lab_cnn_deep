@@ -1,0 +1,6 @@
+{
+  "image_path": "data\\Male and Female face dataset\\Female Faces\\0 (10).jpg",
+  "true_label": "female",
+  "predicted_label": "female",
+  "confidence": 0.6174517571926117
+}

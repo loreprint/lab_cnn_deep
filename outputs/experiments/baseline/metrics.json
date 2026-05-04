@@ -1,0 +1,19 @@
+{
+  "name": "baseline",
+  "model_path": "C:\\Users\\lore7\\Documents\\Playground\\cnn_xai_gender_lab\\outputs\\experiments\\baseline\\model.keras",
+  "epochs_trained": 5,
+  "base_filters": 24.0,
+  "kernel_size": 3.0,
+  "dense_units": 96.0,
+  "dropout": 0.45,
+  "learning_rate": 0.0003499999875202775,
+  "accuracy": 0.6692307591438293,
+  "auc": 0.7313011884689331,
+  "loss": 0.6120758056640625,
+  "val_accuracy": 0.4462151527404785,
+  "val_auc": 0.6049274802207947,
+  "val_loss": 0.7412484288215637,
+  "test_accuracy": 0.43824702501296997,
+  "test_auc": 0.5329500436782837,
+  "test_loss": 0.7130844593048096
+}
