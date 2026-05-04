@@ -1244,7 +1244,7 @@ def render_demo_tab(
         return
 
     if inference_mode == "Modelo individual":
-        model_path = Path(demo_metrics["model_path"]) if demo_metrics and demo_metrics.get("model_path") else MODELS_DIR / "model.keras"
+        model_path = resolve_model_path(demo_metrics)
     else:
         model_path = MODELS_DIR / "model.keras"
     if inference_mode == "Modelo individual" and not model_path.exists():
