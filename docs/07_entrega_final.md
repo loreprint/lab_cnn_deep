@@ -50,28 +50,17 @@ Este archivo resume todo lo entregado y lo que falta para tener la version publi
 ## 4. Estado tecnico actual
 
 - La app funciona localmente.
+- La app ya fue desplegada en Streamlit Community Cloud.
+- El repositorio ya fue publicado con `Git LFS`.
 - La documentacion ya esta completa y alineada con el proyecto actual.
-- El repo ya esta preparado para publicarse con `Git LFS`.
 - La demo usa por defecto un modo `Robusto (ensemble)` para reducir errores extremos en imagenes externas.
 
-## 5. Lo unico que falta para tener el link publico
+## 5. Enlaces finales de entrega
 
-1. Crear o elegir un repositorio de GitHub solo para `cnn_xai_gender_lab`.
-2. Subir `models/model.keras` con `Git LFS`.
-3. Conectar el repo a `Streamlit Community Cloud`.
-4. Desplegar `streamlit_app.py`.
-5. Copiar la URL publica final.
+- URL del repositorio: `https://github.com/loreprint/lab_cnn_deep`
+- URL de la app: `https://labcnndeep-vuuuljbnnekubsbqudwi7b.streamlit.app/`
 
-## 6. Donde registrar el enlace final
+## 6. Lo unico pendiente por completar manualmente
 
-Cuando la app quede publicada, pega el link en:
-
-- [03_entregable_manuscrito.md](/C:/Users/lore7/Documents/Playground/cnn_xai_gender_lab/docs/03_entregable_manuscrito.md)
-- este mismo archivo
-
-Campos por completar:
-
-- URL del repositorio: `Pendiente`
-- URL de la app: `Pendiente`
 - Estudiante: `Pendiente`
 - Curso: `Pendiente`

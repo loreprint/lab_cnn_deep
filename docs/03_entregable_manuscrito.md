@@ -1,4 +1,4 @@
-# Entregable manuscrito
+﻿# Entregable manuscrito
 
 Este documento deja redactado el contenido principal que pide el laboratorio. Puedes copiarlo a tu informe final y solo completar portada, nombre del curso, nombre del estudiante y enlaces publicos.
 
@@ -7,8 +7,8 @@ Este documento deja redactado el contenido principal que pide el laboratorio. Pu
 - Titulo: `Laboratorio CNNs-XAI`
 - Estudiante: `Completar`
 - Curso: `Completar`
-- Repositorio GitHub: `Completar cuando publiques el repo`
-- App publica: `Completar cuando despliegues en Streamlit Cloud`
+- Repositorio GitHub: `https://github.com/loreprint/lab_cnn_deep`
+- App publica: `https://labcnndeep-vuuuljbnnekubsbqudwi7b.streamlit.app/`
 
 ## 1. Contexto del problema
 
@@ -279,6 +279,7 @@ El laboratorio deja dos aprendizajes centrales.
 
 El primero es metodologico: un modelo puede parecer excelente cuando existe fuga entre entrenamiento y prueba, pero esa conclusion cambia radicalmente cuando se audita el dataset y se corrige la particion. En este proyecto, la revision de duplicados transformo por completo la lectura del sistema.
 
-El segundo es practico: las tecnicas XAI no solo sirven para “decorar” una prediccion, sino para descubrir que la red todavia depende de factores espurios como fondo, encuadre o estilo visual. A partir de eso se justifico una app final mas robusta, con varios modos de recorte y un ensemble para la demostracion publica.
+El segundo es practico: las tecnicas XAI no solo sirven para "decorar" una prediccion, sino para descubrir que la red todavia depende de factores espurios como fondo, encuadre o estilo visual. A partir de eso se justifico una app final mas robusta, con varios modos de recorte y un ensemble para la demostracion publica.
 
 En conjunto, el proyecto cumple con lo pedido por el laboratorio y, ademas, aporta una lectura critica sobre la calidad del dataset, la validez de la evaluacion y las limitaciones reales del modelo.
+

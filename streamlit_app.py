@@ -626,6 +626,15 @@ def resolve_model_path(model_metrics: dict | None) -> Path:
     return fallback
 
 
+def experiment_has_own_model_file(model_metrics: dict | None) -> bool:
+    if not model_metrics:
+        return False
+    model_path_value = model_metrics.get("model_path")
+    if not model_path_value:
+        return False
+    return Path(str(model_path_value)).exists()
+
+
 def summarize_from_male_probability(male_probability: float) -> dict:
     male_probability = float(np.clip(male_probability, 0.0, 1.0))
     female_probability = 1.0 - male_probability
@@ -689,7 +698,11 @@ def run_single_inference(model_metrics: dict, selected_view: dict) -> tuple[dict
     return prediction, anchor_vote
 
 
-def run_robust_inference(experiment_registry: dict[str, dict], views: dict[str, dict]) -> tuple[dict, dict, list[dict]]:
+def run_robust_inference(
+    experiment_registry: dict[str, dict],
+    views: dict[str, dict],
+    best_metrics: dict | None,
+) -> tuple[dict, dict, list[dict]]:
     vote_specs = [
         ("face_crop_k5", "auto", 0.34),
         ("compact_k5_dropout", "auto", 0.28),
@@ -700,7 +713,7 @@ def run_robust_inference(experiment_registry: dict[str, dict], views: dict[str, 
 
     for experiment_name, view_key, weight in vote_specs:
         metrics = experiment_registry.get(experiment_name)
-        if metrics is None:
+        if metrics is None or not experiment_has_own_model_file(metrics):
             continue
         selected_view = views[view_key]
         model = read_model(resolve_model_path(metrics))
@@ -720,7 +733,12 @@ def run_robust_inference(experiment_registry: dict[str, dict], views: dict[str, 
         )
 
     if not votes:
-        raise FileNotFoundError("No hay modelos disponibles para la inferencia robusta.")
+        fallback_metrics = best_metrics or {"name": "modelo_publico", "model_path": str(MODELS_DIR / "model.keras")}
+        fallback_view = views["auto"] if views["auto_found"] else views["full"]
+        prediction, anchor_vote = run_single_inference(fallback_metrics, fallback_view)
+        anchor_vote["model_name"] = fallback_metrics.get("name", "modelo_publico")
+        votes = [anchor_vote]
+        return prediction, anchor_vote, votes
 
     total_weight = sum(vote["weight"] for vote in votes) or 1.0
     male_probability = sum(
@@ -1211,6 +1229,7 @@ def render_demo_tab(
     crop_strategy: str,
     inference_mode: str,
     experiment_registry: dict[str, dict],
+    best_metrics: dict | None,
 ) -> None:
     st.markdown(
         """
@@ -1280,7 +1299,7 @@ def render_demo_tab(
         st.caption("Usando un recorte heuristico centrado en la zona superior de la imagen.")
 
     if inference_mode == "Robusto (ensemble)":
-        prediction, anchor_vote, votes = run_robust_inference(experiment_registry, view_map)
+        prediction, anchor_vote, votes = run_robust_inference(experiment_registry, view_map, best_metrics)
     else:
         if not demo_metrics:
             st.error("No hay metricas disponibles para el modelo individual seleccionado.")
@@ -1357,7 +1376,12 @@ def main() -> None:
         str(OUTPUTS_DIR / "experiments"),
         get_experiment_signature(OUTPUTS_DIR / "experiments"),
     )
-    experiment_options = list(experiment_registry.keys())
+    experiment_options = [
+        name for name, metrics in experiment_registry.items()
+        if experiment_has_own_model_file(metrics)
+    ]
+    if best_metrics and best_metrics.get("best_experiment") and best_metrics["best_experiment"] not in experiment_options:
+        experiment_options = [best_metrics["best_experiment"], *experiment_options]
     default_experiment_name = (
         best_metrics["best_experiment"]
         if best_metrics and best_metrics.get("best_experiment") in experiment_registry
@@ -1413,6 +1437,8 @@ def main() -> None:
             st.sidebar.write(f'Nombre: `{demo_metrics.get("name", "N/D")}`')
             st.sidebar.write(f'Accuracy test: `{demo_metrics["test_accuracy"]:.4f}`')
             st.sidebar.write(f'AUC test: `{demo_metrics["test_auc"]:.4f}`')
+            if not experiment_has_own_model_file(demo_metrics):
+                st.sidebar.caption("En la nube se usa el modelo publicado principal como respaldo para este experimento.")
 
     report_tab, demo_tab = st.tabs(["Informe del laboratorio", "Demo interactiva"])
 
@@ -1420,7 +1446,7 @@ def main() -> None:
         render_report_tab(raw_dataset_summary, dataset_summary, split_summary, best_metrics, comparison_frame)
 
     with demo_tab:
-        render_demo_tab(demo_metrics, crop_strategy, inference_mode, experiment_registry)
+        render_demo_tab(demo_metrics, crop_strategy, inference_mode, experiment_registry, best_metrics)
 
 
 if __name__ == "__main__":
