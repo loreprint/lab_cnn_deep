@@ -13,7 +13,7 @@ from tensorflow import keras
 PROJECT_ROOT = Path(__file__).resolve().parent
 SRC_PATH = PROJECT_ROOT / "src"
 REPO_URL = "https://github.com/loreprint/lab_cnn_deep"
-PUBLIC_APP_URL = "https://labcnndeep-vuuuljbnnekubsbqudwi7b.streamlit.app/"
+PUBLIC_APP_URL = "https://labcnndeep-loreuec.streamlit.app/"
 if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 

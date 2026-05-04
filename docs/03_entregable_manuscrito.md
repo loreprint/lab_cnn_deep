@@ -8,7 +8,7 @@ Este documento deja redactado el contenido principal que pide el laboratorio. Pu
 - Estudiante: `Completar`
 - Curso: `Completar`
 - Repositorio GitHub: `https://github.com/loreprint/lab_cnn_deep`
-- App publica: `https://labcnndeep-vuuuljbnnekubsbqudwi7b.streamlit.app/`
+- App publica: `https://labcnndeep-loreuec.streamlit.app/`
 
 ## 1. Contexto del problema
 

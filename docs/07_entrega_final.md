@@ -55,7 +55,7 @@
 ## 5. Enlaces finales de entrega
 
 - URL del repositorio: `https://github.com/loreprint/lab_cnn_deep`
-- URL de la app: `[https://labcnndeep-vuuuljbnnekubsbqudwi7b.streamlit.app/](https://labcnndeep-loreuec.streamlit.app/)`
+- URL de la app: `https://labcnndeep-loreuec.streamlit.app/`
 
 ## 6. Lo unico pendiente por completar manualmente
 
