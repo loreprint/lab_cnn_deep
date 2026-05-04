@@ -1,6 +1,5 @@
 # Entrega final del laboratorio
 
-Este archivo resume todo lo entregado y lo que falta para tener la version publica final.
 
 ## 1. Codigo fuente
 
@@ -30,8 +29,6 @@ Este archivo resume todo lo entregado y lo que falta para tener la version publi
 - [01_guia_laboratorio.md](/C:/Users/lore7/Documents/Playground/cnn_xai_gender_lab/docs/01_guia_laboratorio.md)
 - [03_entregable_manuscrito.md](/C:/Users/lore7/Documents/Playground/cnn_xai_gender_lab/docs/03_entregable_manuscrito.md)
 - [04_despliegue_streamlit_cloud.md](/C:/Users/lore7/Documents/Playground/cnn_xai_gender_lab/docs/04_despliegue_streamlit_cloud.md)
-- [05_guion_presentacion.md](/C:/Users/lore7/Documents/Playground/cnn_xai_gender_lab/docs/05_guion_presentacion.md)
-- [06_checklist_entrega.md](/C:/Users/lore7/Documents/Playground/cnn_xai_gender_lab/docs/06_checklist_entrega.md)
 - [10_auditoria_modelo_y_datos.md](/C:/Users/lore7/Documents/Playground/cnn_xai_gender_lab/docs/10_auditoria_modelo_y_datos.md)
 
 ## 3. Artefactos de resultados
@@ -58,9 +55,9 @@ Este archivo resume todo lo entregado y lo que falta para tener la version publi
 ## 5. Enlaces finales de entrega
 
 - URL del repositorio: `https://github.com/loreprint/lab_cnn_deep`
-- URL de la app: `https://labcnndeep-vuuuljbnnekubsbqudwi7b.streamlit.app/`
+- URL de la app: `[https://labcnndeep-vuuuljbnnekubsbqudwi7b.streamlit.app/](https://labcnndeep-loreuec.streamlit.app/)`
 
 ## 6. Lo unico pendiente por completar manualmente
 
 - Estudiante: `Pendiente`
-- Curso: `Pendiente`
+- Curso: ` Deep learning 2026 `
