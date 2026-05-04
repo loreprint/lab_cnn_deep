@@ -12,6 +12,8 @@ from tensorflow import keras
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 SRC_PATH = PROJECT_ROOT / "src"
+REPO_URL = "https://github.com/loreprint/lab_cnn_deep"
+PUBLIC_APP_URL = "https://labcnndeep-vuuuljbnnekubsbqudwi7b.streamlit.app/"
 if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
@@ -1222,6 +1224,239 @@ def render_report_tab(
         for column in ["Filtros base", "Kernel"]:
             display_frame[column] = display_frame[column].map(lambda value: f"{int(value)}")
         render_html_table(display_frame)
+
+    st.write("")
+    render_section_header(
+        "Preguntas del manuscrito",
+        "Respuestas explicitas a cada punto del PDF",
+        "Este bloque responde de manera directa, en el mismo orden del laboratorio, las preguntas del entregable manuscrito. La idea es que no solo se vea el resultado, sino que quede claro por que se tomo cada decision y que se concluye de ella.",
+    )
+
+    compact_row = None
+    baseline_row = None
+    if not comparison_frame.empty:
+        selected = comparison_frame[comparison_frame["name"] == "compact_k5_dropout"]
+        if not selected.empty:
+            compact_row = selected.iloc[0]
+        selected = comparison_frame[comparison_frame["name"] == "baseline"]
+        if not selected.empty:
+            baseline_row = selected.iloc[0]
+
+    val_gap_text = "N/D"
+    if compact_row is not None:
+        val_gap = float(compact_row["accuracy"]) - float(compact_row["val_accuracy"])
+        val_gap_text = f"{val_gap:.4f}"
+
+    structure_block = """data/
+`-- Male and Female face dataset/
+    |-- Female Faces/
+    `-- Male Faces/"""
+    split_flow_block = "Lectura RGB -> Redimensionamiento 224x224 -> Normalizacion [0,1] -> Particion train / val / test"
+    interface_block = """Barra lateral
+-> seleccion de modelo / modo de inferencia / region
+
+Pestana 1: Informe del laboratorio
+-> dataset -> arquitectura -> resultados -> reflexion
+
+Pestana 2: Demo interactiva
+-> carga de imagen -> prediccion -> probabilidades -> Saliency Map -> Grad-CAM"""
+    xai_face_block = """        Cabello / linea frontal
+             _________
+            /         \\
+       Ojo izquierdo   Ojo derecho
+             \\   Nariz   /
+               \\       /
+                 Boca
+                  |
+           Contorno mandibular
+                  |
+                 Cuello"""
+
+    ex1_col, ex2_col = st.columns(2, gap="large")
+    with ex1_col:
+        st.markdown(
+            f"""
+            <div class="info-card">
+                <h3>Ejercicio 1. Descarga y exploracion del dataset</h3>
+                <p>
+                    El dataset contiene <strong>{raw_total_images}</strong> imagenes crudas distribuidas en dos clases binarias:
+                    <strong>{female_count} female</strong> y <strong>{male_count} male</strong>. La variabilidad de tamano es alta,
+                    con resoluciones muy pequenas y muy grandes, lo que justifica el resize uniforme antes del entrenamiento.
+                    La observacion mas importante fue la deteccion de <strong>{raw_total_images - unique_images}</strong> duplicados o casi duplicados,
+                    por lo que la lectura metodologicamente valida se hizo sobre <strong>{unique_images}</strong> imagenes unicas.
+                </p>
+                <p>
+                    Esto explica por que no bastaba con entrenar directamente: primero habia que limpiar y auditar, de lo contrario
+                    las metricas podian verse mejor de lo que realmente eran.
+                </p>
+                <p>
+                    El mosaico mostrado arriba responde a la parte de "ejemplos representativos", mientras que el esquema inferior
+                    resume la organizacion en carpetas con la que se leyeron las clases del dataset.
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.code(structure_block, language="text")
+
+    with ex2_col:
+        st.markdown(
+            """
+            <div class="info-card">
+                <h3>Ejercicio 2. Preprocesamiento y particion</h3>
+                <p>
+                    El preprocesamiento consistio en leer la imagen en RGB, redimensionarla a 224x224 y normalizarla al rango [0,1].
+                    La consistencia de tamano es importante porque la CNN necesita tensores con una forma fija; la consistencia de color
+                    tambien importa porque evita que unas imagenes entren con informacion distinta a otras. En la version corregida,
+                    ademas, se deduplico antes de partir para evitar fuga entre entrenamiento, validacion y prueba.
+                </p>
+                <p>
+                    La particion se hizo despues de la deduplicacion para que una misma cara no apareciera en entrenamiento y prueba.
+                    Por eso el flujo no termina en "normalizar": tambien incluye la separacion honesta en train, val y test.
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.code(split_flow_block, language="text")
+
+    ex3_col, ex4_col = st.columns(2, gap="large")
+    with ex3_col:
+        st.markdown(
+            f"""
+            <div class="info-card">
+                <h3>Ejercicio 3. Construccion y entrenamiento de la CNN</h3>
+                <p>
+                    La arquitectura final usa bloques convolucionales, normalizacion por lotes, max pooling, una etapa de
+                    GlobalAveragePooling2D y una cabeza densa con dropout. El punto clave del analisis es que, tras corregir la fuga,
+                    la brecha entre entrenamiento y validacion del experimento <strong>compact_k5_dropout</strong> fue de
+                    <strong>{val_gap_text}</strong>. Esto sugiere una generalizacion limitada y una senal de sobreajuste moderado:
+                    el modelo aprende, pero no transfiere todo lo aprendido con la misma fuerza a validacion y prueba.
+                </p>
+                <p>
+                    Por eso las curvas no deben leerse solo como "sube accuracy", sino como evidencia de que el problema real es mas
+                    dificil cuando la evaluacion ya no esta contaminada.
+                </p>
+                <p>
+                    Las curvas que aparecen arriba responden a la parte del PDF sobre entrenamiento y validacion. La lectura no es solo
+                    "si sube accuracy", sino si entrenamiento y validacion evolucionan de forma parecida o se separan demasiado.
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    with ex4_col:
+        best_name = best_metrics["best_experiment"] if best_metrics else "N/D"
+        best_test_acc = f'{best_metrics["test_accuracy"]:.4f}' if best_metrics else "N/D"
+        best_test_auc = f'{best_metrics["test_auc"]:.4f}' if best_metrics else "N/D"
+        compact_acc = f'{compact_row["test_accuracy"]:.4f}' if compact_row is not None else "N/D"
+        baseline_acc = f'{baseline_row["test_accuracy"]:.4f}' if baseline_row is not None else "N/D"
+        st.markdown(
+            f"""
+            <div class="info-card">
+                <h3>Ejercicio 4. Ajuste de hiperparametros</h3>
+                <p>
+                    La tabla comparativa muestra que el checkpoint operativo de mejor puntaje fue <strong>{best_name}</strong>
+                    con <strong>accuracy {best_test_acc}</strong> y <strong>AUC {best_test_auc}</strong>. Sin embargo, para la lectura
+                    metodologica del laboratorio, el experimento mas importante es <strong>compact_k5_dropout</strong>, porque representa
+                    el pipeline corregido y aun asi supera a <strong>baseline</strong> (<strong>{compact_acc}</strong> vs <strong>{baseline_acc}</strong>).
+                </p>
+                <p>
+                    La justificacion correcta es doble: un mejor checkpoint para la demo publica y un mejor experimento corregido para
+                    el analisis academico. Esa distincion evita conclusiones enganosas.
+                </p>
+                <p>
+                    En otras palabras: la tabla no se usa solo para "elegir el mas alto", sino para justificar por que una configuracion
+                    sirve mejor para demostrar y otra sirve mejor para argumentar con rigor metodologico.
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    ex5_col, ex6_col = st.columns(2, gap="large")
+    with ex5_col:
+        st.markdown(
+            """
+            <div class="info-card">
+                <h3>Ejercicio 5. Saliency Map y Grad-CAM</h3>
+                <p>
+                    Saliency Map muestra sensibilidad a nivel de pixel: responde a que pixeles pequenos afectan mas la salida.
+                    Grad-CAM, en cambio, resume activaciones sobre una capa convolucional profunda y por eso resalta regiones completas
+                    del rostro. En la practica, Saliency Map suele verse mas fino y ruidoso, mientras que Grad-CAM suele ser mas semantico.
+                </p>
+                <p>
+                    En este laboratorio, ambos mapas sugieren que la red usa ojos, nariz, boca, contorno facial y linea del cabello,
+                    aunque en ciertos casos tambien se activan cuello, ropa o fondo cercano. Eso explica por que algunas predicciones
+                    mejoran al recortar el rostro: se reduce la influencia de contexto espurio.
+                </p>
+                <p>
+                    La imagen de interpretabilidad mostrada arriba corresponde a una prediccion correcta con ambos mapas superpuestos
+                    sobre la imagen original, justo como lo pide el ejercicio del PDF.
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.code(xai_face_block, language="text")
+
+    with ex6_col:
+        st.markdown(
+            """
+            <div class="info-card">
+                <h3>Ejercicio 6. Despliegue con Streamlit</h3>
+                <p>
+                    La interfaz se divide en una barra lateral de configuracion, una pestana de informe y una pestana de demo.
+                    El flujo es: imagen cargada -> preprocesamiento -> prediccion -> probabilidades -> mapas XAI. Esta separacion
+                    hace que la app no solo funcione, sino que explique con claridad que esta pasando y por que.
+                </p>
+                <p>
+                    Dos mejoras propuestas son: usar un detector facial mas robusto que Haar Cascade y construir un conjunto externo
+                    curado para validar mejor la generalizacion. Ambas extensiones responden directamente a las limitaciones encontradas.
+                </p>
+                <p>
+                    El despliegue publico funciona como evidencia de que el modelo, la interfaz y las visualizaciones quedaron integrados
+                    en una experiencia usable y no solo en un cuaderno de entrenamiento.
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        st.code(interface_block, language="text")
+
+    ex7_col, entrega_col = st.columns(2, gap="large")
+    with ex7_col:
+        st.markdown(
+            """
+            <div class="insight-box">
+                <strong>Ejercicio 7. Presentacion y reflexion final.</strong> La sustentacion debe mostrar una imagen en la app,
+                explicar la prediccion, interpretar los mapas y justificar por que el laboratorio cambio de lectura despues de auditar
+                el dataset. La reflexion central es que una metrica alta por si sola no basta: hay que revisar calidad de datos,
+                consistencia del preprocesamiento y honestidad de la evaluacion para que el resultado tenga sentido.
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    with entrega_col:
+        st.markdown(
+            f"""
+            <div class="info-card">
+                <h3>Entrega final</h3>
+                <p>
+                    Lo que se entrega al cerrar el laboratorio es: enlace publico funcional de la aplicacion,
+                    repositorio con el codigo, notebook/cuaderno de entrenamiento y entregable manuscrito con analisis,
+                    diagramas y justificacion metodologica. Esta pagina sintetiza esas respuestas para que el manuscrito y la demo
+                    queden alineados.
+                </p>
+                <p>
+                    App publica: <a href="{PUBLIC_APP_URL}" target="_blank">{PUBLIC_APP_URL}</a><br/>
+                    Repositorio: <a href="{REPO_URL}" target="_blank">{REPO_URL}</a>
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
 
 def render_demo_tab(
