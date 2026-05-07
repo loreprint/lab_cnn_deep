@@ -264,7 +264,11 @@ st.markdown(
         line-height: 1.6;
     }
     .info-card {
-        height: 100%;
+        height: auto;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.55rem;
         padding: 1.1rem 1.15rem;
         border-radius: 24px;
         background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
@@ -287,7 +291,7 @@ st.markdown(
         padding-left: 1.1rem;
     }
     .metric-card {
-        height: 100%;
+        height: auto;
         padding: 1.08rem 1.1rem;
         border-radius: 22px;
         background:
@@ -407,6 +411,55 @@ st.markdown(
         color: var(--ink);
         line-height: 1.6;
         box-shadow: 0 16px 34px rgba(4, 2, 10, 0.18);
+    }
+    .manuscript-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+        align-items: start;
+        margin-top: 0.35rem;
+    }
+    .manuscript-card {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+        min-height: 100%;
+        padding: 1.2rem 1.25rem;
+        border-radius: 26px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+        border: 1px solid rgba(173, 141, 255, 0.12);
+        box-shadow: 0 18px 36px rgba(4, 2, 10, 0.18);
+        backdrop-filter: blur(12px);
+    }
+    .manuscript-card h3 {
+        margin: 0;
+        color: var(--ink-strong);
+        font-size: 1.14rem;
+        line-height: 1.28;
+    }
+    .manuscript-card p {
+        margin: 0;
+        color: var(--ink-soft);
+        line-height: 1.7;
+        font-size: 0.96rem;
+    }
+    .manuscript-card strong {
+        color: var(--ink-strong);
+    }
+    .manuscript-card pre {
+        margin: 0;
+        padding: 0.9rem 1rem;
+        border-radius: 18px;
+        background: rgba(10, 8, 17, 0.68);
+        border: 1px solid rgba(173, 141, 255, 0.12);
+        color: #e7dcff;
+        font-size: 0.87rem;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        overflow-x: auto;
+    }
+    .manuscript-full {
+        grid-column: 1 / -1;
     }
     .report-table {
         width: 100%;
@@ -548,6 +601,12 @@ st.markdown(
         }
         .story-ribbon {
             grid-template-columns: 1fr;
+        }
+        .manuscript-grid {
+            grid-template-columns: 1fr;
+        }
+        .manuscript-full {
+            grid-column: auto;
         }
     }
     </style>
@@ -1275,11 +1334,16 @@ Pestana 2: Demo interactiva
                   |
                  Cuello"""
 
-    ex1_col, ex2_col = st.columns(2, gap="large")
-    with ex1_col:
-        st.markdown(
-            f"""
-            <div class="info-card">
+    best_name = best_metrics["best_experiment"] if best_metrics else "N/D"
+    best_test_acc = f'{best_metrics["test_accuracy"]:.4f}' if best_metrics else "N/D"
+    best_test_auc = f'{best_metrics["test_auc"]:.4f}' if best_metrics else "N/D"
+    compact_acc = f'{compact_row["test_accuracy"]:.4f}' if compact_row is not None else "N/D"
+    baseline_acc = f'{baseline_row["test_accuracy"]:.4f}' if baseline_row is not None else "N/D"
+
+    st.markdown(
+        f"""
+        <div class="manuscript-grid">
+            <div class="manuscript-card">
                 <h3>Ejercicio 1. Descarga y exploracion del dataset</h3>
                 <p>
                     El dataset contiene <strong>{raw_total_images}</strong> imagenes crudas distribuidas en dos clases binarias:
@@ -1290,74 +1354,38 @@ Pestana 2: Demo interactiva
                 </p>
                 <p>
                     Esto explica por que no bastaba con entrenar directamente: primero habia que limpiar y auditar, de lo contrario
-                    las metricas podian verse mejor de lo que realmente eran.
+                    las metricas podian verse mejor de lo que realmente eran. El mosaico mostrado arriba responde a la parte de
+                    "ejemplos representativos" y el siguiente esquema resume la estructura de carpetas.
                 </p>
-                <p>
-                    El mosaico mostrado arriba responde a la parte de "ejemplos representativos", mientras que el esquema inferior
-                    resume la organizacion en carpetas con la que se leyeron las clases del dataset.
-                </p>
+                <pre>{structure_block}</pre>
             </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        st.code(structure_block, language="text")
-
-    with ex2_col:
-        st.markdown(
-            """
-            <div class="info-card">
+            <div class="manuscript-card">
                 <h3>Ejercicio 2. Preprocesamiento y particion</h3>
                 <p>
                     El preprocesamiento consistio en leer la imagen en RGB, redimensionarla a 224x224 y normalizarla al rango [0,1].
                     La consistencia de tamano es importante porque la CNN necesita tensores con una forma fija; la consistencia de color
-                    tambien importa porque evita que unas imagenes entren con informacion distinta a otras. En la version corregida,
-                    ademas, se deduplico antes de partir para evitar fuga entre entrenamiento, validacion y prueba.
+                    tambien importa porque evita que unas imagenes entren con informacion distinta a otras.
                 </p>
                 <p>
-                    La particion se hizo despues de la deduplicacion para que una misma cara no apareciera en entrenamiento y prueba.
+                    En la version corregida, ademas, se deduplico antes de partir para evitar fuga entre entrenamiento, validacion y prueba.
                     Por eso el flujo no termina en "normalizar": tambien incluye la separacion honesta en train, val y test.
                 </p>
+                <pre>{split_flow_block}</pre>
             </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        st.code(split_flow_block, language="text")
-
-    ex3_col, ex4_col = st.columns(2, gap="large")
-    with ex3_col:
-        st.markdown(
-            f"""
-            <div class="info-card">
+            <div class="manuscript-card">
                 <h3>Ejercicio 3. Construccion y entrenamiento de la CNN</h3>
                 <p>
                     La arquitectura final usa bloques convolucionales, normalizacion por lotes, max pooling, una etapa de
-                    GlobalAveragePooling2D y una cabeza densa con dropout. El punto clave del analisis es que, tras corregir la fuga,
-                    la brecha entre entrenamiento y validacion del experimento <strong>compact_k5_dropout</strong> fue de
-                    <strong>{val_gap_text}</strong>. Esto sugiere una generalizacion limitada y una senal de sobreajuste moderado:
-                    el modelo aprende, pero no transfiere todo lo aprendido con la misma fuerza a validacion y prueba.
+                    GlobalAveragePooling2D y una cabeza densa con dropout. Tras corregir la fuga, la brecha entre entrenamiento y
+                    validacion del experimento <strong>compact_k5_dropout</strong> fue de <strong>{val_gap_text}</strong>.
                 </p>
                 <p>
-                    Por eso las curvas no deben leerse solo como "sube accuracy", sino como evidencia de que el problema real es mas
-                    dificil cuando la evaluacion ya no esta contaminada.
-                </p>
-                <p>
-                    Las curvas que aparecen arriba responden a la parte del PDF sobre entrenamiento y validacion. La lectura no es solo
-                    "si sube accuracy", sino si entrenamiento y validacion evolucionan de forma parecida o se separan demasiado.
+                    Esto sugiere una generalizacion limitada y una senal de sobreajuste moderado: el modelo aprende, pero no transfiere
+                    todo lo aprendido con la misma fuerza a validacion y prueba. Las curvas que aparecen arriba responden exactamente
+                    a la parte del PDF sobre entrenamiento y validacion.
                 </p>
             </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-    with ex4_col:
-        best_name = best_metrics["best_experiment"] if best_metrics else "N/D"
-        best_test_acc = f'{best_metrics["test_accuracy"]:.4f}' if best_metrics else "N/D"
-        best_test_auc = f'{best_metrics["test_auc"]:.4f}' if best_metrics else "N/D"
-        compact_acc = f'{compact_row["test_accuracy"]:.4f}' if compact_row is not None else "N/D"
-        baseline_acc = f'{baseline_row["test_accuracy"]:.4f}' if baseline_row is not None else "N/D"
-        st.markdown(
-            f"""
-            <div class="info-card">
+            <div class="manuscript-card">
                 <h3>Ejercicio 4. Ajuste de hiperparametros</h3>
                 <p>
                     La tabla comparativa muestra que el checkpoint operativo de mejor puntaje fue <strong>{best_name}</strong>
@@ -1366,26 +1394,14 @@ Pestana 2: Demo interactiva
                     el pipeline corregido y aun asi supera a <strong>baseline</strong> (<strong>{compact_acc}</strong> vs <strong>{baseline_acc}</strong>).
                 </p>
                 <p>
-                    La justificacion correcta es doble: un mejor checkpoint para la demo publica y un mejor experimento corregido para
-                    el analisis academico. Esa distincion evita conclusiones enganosas.
-                </p>
-                <p>
-                    En otras palabras: la tabla no se usa solo para "elegir el mas alto", sino para justificar por que una configuracion
-                    sirve mejor para demostrar y otra sirve mejor para argumentar con rigor metodologico.
+                    La tabla no se usa solo para "elegir el mas alto": sirve para justificar por que una configuracion funciona mejor
+                    para la demo publica y otra para argumentar con rigor academico.
                 </p>
             </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-    ex5_col, ex6_col = st.columns(2, gap="large")
-    with ex5_col:
-        st.markdown(
-            """
-            <div class="info-card">
+            <div class="manuscript-card">
                 <h3>Ejercicio 5. Saliency Map y Grad-CAM</h3>
                 <p>
-                    Saliency Map muestra sensibilidad a nivel de pixel: responde a que pixeles pequenos afectan mas la salida.
+                    Saliency Map muestra sensibilidad a nivel de pixel: indica que pixeles pequenos afectan mas la salida.
                     Grad-CAM, en cambio, resume activaciones sobre una capa convolucional profunda y por eso resalta regiones completas
                     del rostro. En la practica, Saliency Map suele verse mas fino y ruidoso, mientras que Grad-CAM suele ser mas semantico.
                 </p>
@@ -1394,20 +1410,9 @@ Pestana 2: Demo interactiva
                     aunque en ciertos casos tambien se activan cuello, ropa o fondo cercano. Eso explica por que algunas predicciones
                     mejoran al recortar el rostro: se reduce la influencia de contexto espurio.
                 </p>
-                <p>
-                    La imagen de interpretabilidad mostrada arriba corresponde a una prediccion correcta con ambos mapas superpuestos
-                    sobre la imagen original, justo como lo pide el ejercicio del PDF.
-                </p>
+                <pre>{xai_face_block}</pre>
             </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        st.code(xai_face_block, language="text")
-
-    with ex6_col:
-        st.markdown(
-            """
-            <div class="info-card">
+            <div class="manuscript-card">
                 <h3>Ejercicio 6. Despliegue con Streamlit</h3>
                 <p>
                     La interfaz se divide en una barra lateral de configuracion, una pestana de informe y una pestana de demo.
@@ -1416,50 +1421,36 @@ Pestana 2: Demo interactiva
                 </p>
                 <p>
                     Dos mejoras propuestas son: usar un detector facial mas robusto que Haar Cascade y construir un conjunto externo
-                    curado para validar mejor la generalizacion. Ambas extensiones responden directamente a las limitaciones encontradas.
+                    curado para validar mejor la generalizacion. El despliegue publico funciona como evidencia de que el modelo,
+                    la interfaz y las visualizaciones quedaron integrados en una experiencia usable y coherente.
                 </p>
+                <pre>{interface_block}</pre>
+            </div>
+            <div class="manuscript-card manuscript-full">
+                <h3>Ejercicio 7. Presentacion y reflexion final</h3>
                 <p>
-                    El despliegue publico funciona como evidencia de que el modelo, la interfaz y las visualizaciones quedaron integrados
-                    en una experiencia usable y no solo en un cuaderno de entrenamiento.
+                    La sustentacion debe mostrar una imagen en la app, explicar la prediccion, interpretar los mapas y justificar
+                    por que el laboratorio cambio de lectura despues de auditar el dataset. La reflexion central es que una metrica
+                    alta por si sola no basta: hay que revisar calidad de datos, consistencia del preprocesamiento y honestidad de la
+                    evaluacion para que el resultado tenga sentido.
                 </p>
             </div>
-            """,
-            unsafe_allow_html=True,
-        )
-        st.code(interface_block, language="text")
-
-    ex7_col, entrega_col = st.columns(2, gap="large")
-    with ex7_col:
-        st.markdown(
-            """
-            <div class="insight-box">
-                <strong>Ejercicio 7. Presentacion y reflexion final.</strong> La sustentacion debe mostrar una imagen en la app,
-                explicar la prediccion, interpretar los mapas y justificar por que el laboratorio cambio de lectura despues de auditar
-                el dataset. La reflexion central es que una metrica alta por si sola no basta: hay que revisar calidad de datos,
-                consistencia del preprocesamiento y honestidad de la evaluacion para que el resultado tenga sentido.
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-    with entrega_col:
-        st.markdown(
-            f"""
-            <div class="info-card">
+            <div class="manuscript-card manuscript-full">
                 <h3>Entrega final</h3>
                 <p>
-                    Lo que se entrega al cerrar el laboratorio es: enlace publico funcional de la aplicacion,
-                    repositorio con el codigo, notebook/cuaderno de entrenamiento y entregable manuscrito con analisis,
-                    diagramas y justificacion metodologica. Esta pagina sintetiza esas respuestas para que el manuscrito y la demo
-                    queden alineados.
+                    Lo que se entrega al cerrar el laboratorio es: enlace publico funcional de la aplicacion, repositorio con el codigo,
+                    notebook o cuaderno de entrenamiento y entregable manuscrito con analisis, diagramas y justificacion metodologica.
+                    Esta pagina sintetiza esas respuestas para que el manuscrito y la demo queden alineados.
                 </p>
                 <p>
                     App publica: <a href="{PUBLIC_APP_URL}" target="_blank">{PUBLIC_APP_URL}</a><br/>
                     Repositorio: <a href="{REPO_URL}" target="_blank">{REPO_URL}</a>
                 </p>
             </div>
-            """,
-            unsafe_allow_html=True,
-        )
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 def render_demo_tab(
