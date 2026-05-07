@@ -657,6 +657,7 @@ def build_demo_views(image: Image.Image) -> dict[str, dict]:
     full_view = {
         "image": image,
         "boxed_image": image,
+        "key": "full",
         "label": "Imagen completa",
         "method_label": "Imagen completa",
     }
@@ -664,6 +665,7 @@ def build_demo_views(image: Image.Image) -> dict[str, dict]:
         {
             "image": auto_detection.cropped_face,
             "boxed_image": auto_detection.boxed_image,
+            "key": "auto",
             "label": "Deteccion de rostro",
             "method_label": "Deteccion de rostro",
         }
@@ -673,6 +675,7 @@ def build_demo_views(image: Image.Image) -> dict[str, dict]:
     portrait_view = {
         "image": portrait_detection.cropped_face,
         "boxed_image": portrait_detection.boxed_image,
+        "key": "portrait",
         "label": "Recorte retrato",
         "method_label": "Recorte retrato",
     }
@@ -690,7 +693,7 @@ def run_single_inference(model_metrics: dict, selected_view: dict) -> tuple[dict
     prediction = predict_probabilities(model, image_batch)
     anchor_vote = {
         "model_name": model_metrics.get("name", "modelo"),
-        "view_key": selected_view["label"],
+        "view_key": selected_view.get("key", "full"),
         "view_label": selected_view["label"],
         "weight": 1.0,
         "prediction": prediction,
@@ -1543,8 +1546,10 @@ def render_demo_tab(
         votes = [anchor_vote]
 
     image_batch = anchor_vote["image_batch"]
-    image_for_model = selected_view["image"] if inference_mode == "Modelo individual" else view_map[anchor_vote["view_key"]]["image"]
-    selected_display_view = selected_view if inference_mode == "Modelo individual" else view_map[anchor_vote["view_key"]]
+    anchor_view_key = anchor_vote.get("view_key", selected_view_key)
+    anchor_display_view = view_map.get(anchor_view_key, selected_view)
+    image_for_model = selected_view["image"] if inference_mode == "Modelo individual" else anchor_display_view["image"]
+    selected_display_view = selected_view if inference_mode == "Modelo individual" else anchor_display_view
     saliency = compute_saliency_map(anchor_vote["model"], image_batch, prediction["predicted_index"])
     gradcam = make_gradcam_heatmap(anchor_vote["model"], image_batch, prediction["predicted_index"])
 
