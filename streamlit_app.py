@@ -916,40 +916,40 @@ def render_hero(
                     </div>
                     <div class="meta-pill">
                         <strong>Demo interactiva</strong>
-                        Comparacion entre imagen completa, rostro detectado y recorte retrato.
+                        Comparacion entre varios encuadres para ver cuando el modelo acierta y cuando sigue siendo fragil.
                     </div>
                 </div>
             </div>
             <div class="hero-rail">
                 <div class="rail-card">
-                    <div class="rail-label">Mejor experimento</div>
+                    <div class="rail-label">Checkpoint activo</div>
                     <div class="rail-value">{best_name}</div>
-                    <div class="rail-note">Configuracion final elegida tras la correccion del pipeline.</div>
+                    <div class="rail-note">Checkpoint legado conservado para la demo publica por estabilidad visual, no porque represente la lectura metodologica mas estricta.</div>
                 </div>
                 <div class="rail-card">
                     <div class="rail-label">Test accuracy</div>
                     <div class="rail-value">{best_acc}</div>
-                    <div class="rail-note">Desempeno realista despues de eliminar duplicados y fuga entre splits.</div>
+                    <div class="rail-note">Metrica del checkpoint activo en la demo. No debe confundirse con el rendimiento honesto del pipeline corregido sobre fotos externas.</div>
                 </div>
                 <div class="rail-card">
                     <div class="rail-label">Test AUC</div>
                     <div class="rail-value">{best_auc}</div>
-                    <div class="rail-note">{duplicates} imagenes duplicadas o casi duplicadas fueron aisladas del analisis.</div>
+                    <div class="rail-note">{duplicates} imagenes duplicadas o casi duplicadas fueron aisladas durante la auditoria, lo que cambio la lectura real de la generalizacion.</div>
                 </div>
             </div>
         </div>
         <div class="story-ribbon">
             <div class="story-card">
                 <h3>Lo que impresiona aqui</h3>
-                <p>No solo muestra predicciones: cuenta la historia completa del modelo, desde la limpieza del dataset hasta la interpretabilidad visual.</p>
+                <p>No solo muestra predicciones: cuenta toda la historia del laboratorio, desde la limpieza del dataset hasta el diagnostico visual de por que el modelo aun falla.</p>
             </div>
             <div class="story-card">
                 <h3>Lo metodologicamente valioso</h3>
-                <p>La pagina deja claro que un score alto puede ser enganoso cuando el protocolo de evaluacion tiene fuga entre splits.</p>
+                <p>La pagina deja claro que un score alto puede ser enganoso cuando el protocolo de evaluacion tiene fuga entre splits o cuando el modelo se prueba fuera del tipo de fotos con el que fue entrenado.</p>
             </div>
             <div class="story-card">
                 <h3>Lo que se puede explorar</h3>
-                <p>La demo permite contrastar como cambia la salida cuando el modelo ve el fondo completo frente a una region mas facial.</p>
+                <p>La demo permite contrastar como cambia la salida cuando el modelo ve el fondo completo frente a una region mas facial, y deja visible que aun hay errores relevantes en imagenes externas.</p>
             </div>
         </div>
         """,
@@ -1103,9 +1103,9 @@ def render_report_tab(
     with col2:
         render_metric_card("Dataset unico", f"{unique_images}", "Imagenes retenidas despues de deduplicacion por huella visual.")
     with col3:
-        render_metric_card("Test Accuracy", best_accuracy, "Rendimiento del mejor experimento.")
+        render_metric_card("Test Accuracy", best_accuracy, "Metrica del checkpoint publicado que se usa como base de la demo.")
     with col4:
-        render_metric_card("Test AUC", best_auc, "Capacidad de separacion entre clases.")
+        render_metric_card("Test AUC", best_auc, "Separacion entre clases reportada para el checkpoint publicado.")
 
     st.write("")
 
@@ -1238,7 +1238,7 @@ def render_report_tab(
     render_section_header(
         "Resultados",
         "Desempeno, hiperparametros y hallazgos del entrenamiento",
-        "Aqui se muestran las metricas reales obtenidas en las corridas del laboratorio, la comparacion de configuraciones y una lectura critica de los resultados.",
+        "Aqui se muestran las metricas obtenidas en las corridas del laboratorio, la comparacion de configuraciones y una lectura critica que distingue entre el checkpoint activo de la demo y el pipeline corregido metodologicamente.",
     )
 
     best_experiment_name = best_metrics["best_experiment"] if best_metrics else "N/D"
@@ -1274,7 +1274,7 @@ def render_report_tab(
         if curves_path.exists():
             st.image(
                 str(curves_path),
-                caption="Curvas de entrenamiento y validacion del mejor experimento.",
+                caption="Curvas de entrenamiento y validacion del checkpoint activo en la demo.",
                 use_container_width=True,
             )
     with right_results:
@@ -1424,7 +1424,8 @@ Pestana 2: Demo interactiva
                 </p>
                 <p>
                     La tabla no se usa solo para "elegir el mas alto": sirve para justificar por que una configuracion funciona mejor
-                    para la demo publica y otra para argumentar con rigor academico.
+                    para la demo publica y otra para argumentar con rigor academico. Tambien deja claro por que la pagina puede verse convincente
+                    en algunos ejemplos y aun asi fallar bastante cuando se prueba con fotos externas de estilo distinto al dataset.
                 </p>
             </div>
             <div class="manuscript-card">
@@ -1450,8 +1451,9 @@ Pestana 2: Demo interactiva
                 </p>
                 <p>
                     Dos mejoras propuestas son: usar un detector facial mas robusto que Haar Cascade y construir un conjunto externo
-                    curado para validar mejor la generalizacion. El despliegue publico funciona como evidencia de que el modelo,
-                    la interfaz y las visualizaciones quedaron integrados en una experiencia usable y coherente.
+                    curado para validar mejor la generalizacion. El despliegue publico funciona como evidencia de integracion tecnica
+                    entre modelo, interfaz y visualizaciones, pero no debe leerse como prueba de que el clasificador ya generaliza bien
+                    a cualquier retrato externo.
                 </p>
                 <pre>{interface_block}</pre>
             </div>
@@ -1462,6 +1464,11 @@ Pestana 2: Demo interactiva
                     por que el laboratorio cambio de lectura despues de auditar el dataset. La reflexion central es que una metrica
                     alta por si sola no basta: hay que revisar calidad de datos, consistencia del preprocesamiento y honestidad de la
                     evaluacion para que el resultado tenga sentido.
+                </p>
+                <p>
+                    Presentar este proyecto con honestidad implica decir que la app es una buena demostracion del pipeline CNN + XAI,
+                    pero que el modelo activo todavia falla en varias imagenes externas. Eso no invalida el trabajo: refuerza la conclusion
+                    de que el mayor valor del laboratorio esta en la auditoria, la interpretabilidad y la justificacion metodologica.
                 </p>
             </div>
             <div class="manuscript-card manuscript-full">
@@ -1504,7 +1511,9 @@ def render_demo_tab(
             </div>
             <div class="note-box">
                 El modelo fue entrenado con rostros bastante centrados. Si subes una foto con mucho fondo o cuerpo completo,
-                prueba comparar la imagen completa contra el recorte de rostro o el recorte retrato.
+                prueba comparar la imagen completa contra el recorte de rostro o el recorte retrato. La generalizacion sobre
+                fotos externas todavia es imperfecta, asi que esta demo debe leerse como una exploracion del comportamiento
+                del modelo y no como un clasificador plenamente confiable.
             </div>
         </div>
         """,
@@ -1694,10 +1703,11 @@ def main() -> None:
     render_hero(raw_dataset_summary, dataset_summary, best_metrics)
 
     if best_metrics:
-        st.sidebar.markdown("### Mejor experimento")
+        st.sidebar.markdown("### Checkpoint publicado")
         st.sidebar.write(f'Nombre: `{best_metrics["best_experiment"]}`')
         st.sidebar.write(f'Accuracy test: `{best_metrics["test_accuracy"]:.4f}`')
         st.sidebar.write(f'AUC test: `{best_metrics["test_auc"]:.4f}`')
+        st.sidebar.caption("Se conserva por estabilidad de la demo, pero no resume por si solo la generalizacion real en fotos externas.")
     if demo_metrics:
         st.sidebar.markdown("### Modelo activo en demo")
         if inference_mode == "Robusto (ensemble)":
@@ -1706,7 +1716,7 @@ def main() -> None:
                 st.sidebar.write("Base: combinacion de checkpoints disponibles en el despliegue.")
             else:
                 st.sidebar.write("Base: mejor modelo publico evaluado sobre multiples encuadres.")
-            st.sidebar.write("Objetivo: reducir errores extremos en imagenes externas.")
+            st.sidebar.write("Objetivo: reducir errores extremos en imagenes externas, aunque todavia puede fallar de forma visible.")
         else:
             st.sidebar.write(f'Nombre: `{demo_metrics.get("name", "N/D")}`')
             st.sidebar.write(f'Accuracy test: `{demo_metrics["test_accuracy"]:.4f}`')
