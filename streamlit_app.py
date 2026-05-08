@@ -1662,10 +1662,13 @@ def main() -> None:
         key="demo_model_selector_v2",
     ) if experiment_options else None
     demo_metrics = experiment_registry.get(selected_experiment_name) if selected_experiment_name else None
+    available_checkpoint_count = sum(
+        1 for metrics in experiment_registry.values() if experiment_has_own_model_file(metrics)
+    )
     inference_mode = st.sidebar.selectbox(
         "Modo de inferencia",
         ("Robusto (ensemble)", "Modelo individual"),
-        index=0,
+        index=0 if available_checkpoint_count >= 3 else 1,
         key="demo_inference_mode_v1",
     )
 
@@ -1698,9 +1701,6 @@ def main() -> None:
     if demo_metrics:
         st.sidebar.markdown("### Modelo activo en demo")
         if inference_mode == "Robusto (ensemble)":
-            available_checkpoint_count = sum(
-                1 for metrics in experiment_registry.values() if experiment_has_own_model_file(metrics)
-            )
             st.sidebar.write("Nombre: `robusto_ensemble`")
             if available_checkpoint_count >= 3:
                 st.sidebar.write("Base: combinacion de checkpoints disponibles en el despliegue.")
