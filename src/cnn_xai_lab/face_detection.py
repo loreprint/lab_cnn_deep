@@ -17,7 +17,7 @@ class FaceDetectionResult:
 
 def detect_primary_face(
     image: Image.Image,
-    margin_ratio: float = 0.35,
+    margin_ratio: float = 0.18,
     min_face_size: int = 40,
     max_detection_size: int = 960,
 ) -> FaceDetectionResult | None:
@@ -52,16 +52,17 @@ def detect_primary_face(
         y = int(y / scale)
         w = int(w / scale)
         h = int(h / scale)
-    # Use a contextual portrait-style crop around the detected face instead of
-    # a very tight square crop. This keeps hairline, jaw, neck, and some upper
-    # torso, which makes inference more stable for the current demo model.
-    crop_width = int(w * (2.2 + margin_ratio))
-    crop_height = int(h * (2.8 + margin_ratio))
+    # Keep the crop focused on the face with only a moderate amount of
+    # surrounding context. Too much torso/background made the model brittle on
+    # external photos, while a slightly taller crop preserves hairline, jaw,
+    # and a small neck region that still helps classification.
+    crop_width = int(w * (1.55 + margin_ratio))
+    crop_height = int(h * (1.95 + margin_ratio))
     center_x = x + (w / 2)
-    center_y = y + (h * 0.62)
+    center_y = y + (h * 0.56)
 
     left = max(0, int(center_x - (crop_width / 2)))
-    top = max(0, int(center_y - (crop_height * 0.42)))
+    top = max(0, int(center_y - (crop_height * 0.45)))
     right = min(image.width, left + crop_width)
     bottom = min(image.height, top + crop_height)
 
@@ -84,9 +85,9 @@ def detect_primary_face(
 
 def make_portrait_focus_crop(
     image: Image.Image,
-    width_ratio: float = 0.58,
-    height_ratio: float = 0.52,
-    vertical_center_ratio: float = 0.38,
+    width_ratio: float = 0.44,
+    height_ratio: float = 0.60,
+    vertical_center_ratio: float = 0.33,
 ) -> FaceDetectionResult:
     rgb_image = image.convert("RGB")
     crop_width = max(1, int(rgb_image.width * width_ratio))

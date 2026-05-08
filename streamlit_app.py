@@ -709,6 +709,21 @@ def summarize_from_male_probability(male_probability: float) -> dict:
     }
 
 
+def predict_with_tta(model: keras.Model, image_batch: np.ndarray) -> dict:
+    flipped_batch = np.flip(image_batch, axis=2).copy()
+    original_prediction = predict_probabilities(model, image_batch)
+    flipped_prediction = predict_probabilities(model, flipped_batch)
+    mean_male_probability = (
+        original_prediction["male_probability"] + flipped_prediction["male_probability"]
+    ) / 2.0
+    prediction = summarize_from_male_probability(mean_male_probability)
+    prediction["tta_components"] = {
+        "original_male_probability": original_prediction["male_probability"],
+        "flipped_male_probability": flipped_prediction["male_probability"],
+    }
+    return prediction
+
+
 def build_demo_views(image: Image.Image) -> dict[str, dict]:
     auto_detection = detect_primary_face(image)
     portrait_detection = make_portrait_focus_crop(image)
@@ -749,7 +764,7 @@ def build_demo_views(image: Image.Image) -> dict[str, dict]:
 def run_single_inference(model_metrics: dict, selected_view: dict) -> tuple[dict, dict]:
     model = read_model(resolve_model_path(model_metrics))
     image_batch = prepare_image(selected_view["image"], image_size=IMAGE_SIZE)
-    prediction = predict_probabilities(model, image_batch)
+    prediction = predict_with_tta(model, image_batch)
     anchor_vote = {
         "model_name": model_metrics.get("name", "modelo"),
         "view_key": selected_view.get("key", "full"),
@@ -782,7 +797,7 @@ def run_robust_inference(
         selected_view = views[view_key]
         model = read_model(resolve_model_path(metrics))
         image_batch = prepare_image(selected_view["image"], image_size=IMAGE_SIZE)
-        prediction = predict_probabilities(model, image_batch)
+        prediction = predict_with_tta(model, image_batch)
         votes.append(
             {
                 "model_name": experiment_name,
@@ -1557,14 +1572,15 @@ def render_demo_tab(
         st.caption(
             f'Modelo cargado: {metric_name} | '
             "Combina `face_crop_k5`, `compact_k5_dropout` y `wider_k5_dropout` "
-            "sobre multiples encuadres."
+            "sobre multiples encuadres y promedia imagen original + espejo horizontal."
         )
     elif demo_metrics:
         metric_name = demo_metrics.get("name", demo_metrics.get("best_experiment", "N/D"))
         st.caption(
             f'Modelo cargado: {metric_name} | '
             f'Test accuracy: {demo_metrics["test_accuracy"]:.4f} | '
-            f'Test AUC: {demo_metrics["test_auc"]:.4f}'
+            f'Test AUC: {demo_metrics["test_auc"]:.4f} | '
+            "Prediccion estabilizada con imagen original + espejo horizontal"
         )
 
     st.caption(f'Region usada para inferencia: {selected_display_view["method_label"]}.')

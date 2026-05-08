@@ -73,7 +73,7 @@ def main() -> None:
     dataset_frame = deduplicate_dataframe(hashed_dataset_frame, group_column="compact_hash")
     prepared_dataset_frame = build_face_crop_cache(
         hashed_dataset_frame,
-        cache_dir=OUTPUTS_DIR / "prepared_faces",
+        cache_dir=OUTPUTS_DIR / "prepared_faces_v2",
     )
 
     outputs_dir = OUTPUTS_DIR
@@ -164,19 +164,23 @@ def main() -> None:
     experiments = [
         ExperimentConfig(
             name="face_crop_k5",
-            base_filters=32,
+            base_filters=40,
             kernel_size=5,
-            dense_units=128,
-            dropout=0.35,
-            learning_rate=5e-4,
+            dense_units=160,
+            dropout=0.40,
+            learning_rate=4e-4,
+            l2_strength=1.5e-4,
+            label_smoothing=0.04,
         ),
         ExperimentConfig(
             name="face_crop_wider",
-            base_filters=48,
+            base_filters=56,
             kernel_size=3,
-            dense_units=160,
-            dropout=0.30,
+            dense_units=192,
+            dropout=0.35,
             learning_rate=3e-4,
+            l2_strength=1.0e-4,
+            label_smoothing=0.03,
         ),
     ]
     if args.experiment:

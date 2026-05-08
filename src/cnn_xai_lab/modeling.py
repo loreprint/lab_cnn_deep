@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from tensorflow import keras
 from tensorflow.keras import layers
+from tensorflow.keras import regularizers
 
 
 def build_cnn_model(
@@ -11,6 +12,8 @@ def build_cnn_model(
     dense_units: int = 128,
     dropout: float = 0.30,
     learning_rate: float = 1e-3,
+    l2_strength: float = 1e-4,
+    label_smoothing: float = 0.03,
 ) -> keras.Model:
     augmentation = keras.Sequential(
         [
@@ -26,22 +29,50 @@ def build_cnn_model(
         [
             layers.Input(shape=input_shape),
             augmentation,
-            layers.Conv2D(base_filters, kernel_size, activation="relu", padding="same"),
+            layers.Conv2D(
+                base_filters,
+                kernel_size,
+                activation="relu",
+                padding="same",
+                kernel_regularizer=regularizers.l2(l2_strength),
+            ),
             layers.BatchNormalization(),
             layers.MaxPooling2D(),
-            layers.Conv2D(base_filters * 2, kernel_size, activation="relu", padding="same"),
+            layers.Conv2D(
+                base_filters * 2,
+                kernel_size,
+                activation="relu",
+                padding="same",
+                kernel_regularizer=regularizers.l2(l2_strength),
+            ),
             layers.BatchNormalization(),
             layers.SpatialDropout2D(0.08),
             layers.MaxPooling2D(),
-            layers.Conv2D(base_filters * 4, kernel_size, activation="relu", padding="same"),
+            layers.Conv2D(
+                base_filters * 4,
+                kernel_size,
+                activation="relu",
+                padding="same",
+                kernel_regularizer=regularizers.l2(l2_strength),
+            ),
             layers.BatchNormalization(),
             layers.SpatialDropout2D(0.10),
             layers.MaxPooling2D(),
-            layers.Conv2D(base_filters * 6, kernel_size, activation="relu", padding="same"),
+            layers.Conv2D(
+                base_filters * 6,
+                kernel_size,
+                activation="relu",
+                padding="same",
+                kernel_regularizer=regularizers.l2(l2_strength),
+            ),
             layers.BatchNormalization(),
             layers.SpatialDropout2D(0.12),
             layers.GlobalAveragePooling2D(),
-            layers.Dense(dense_units, activation="relu"),
+            layers.Dense(
+                dense_units,
+                activation="relu",
+                kernel_regularizer=regularizers.l2(l2_strength),
+            ),
             layers.Dropout(dropout),
             layers.Dense(1, activation="sigmoid"),
         ],
@@ -50,7 +81,7 @@ def build_cnn_model(
 
     model.compile(
         optimizer=keras.optimizers.Adam(learning_rate=learning_rate),
-        loss="binary_crossentropy",
+        loss=keras.losses.BinaryCrossentropy(label_smoothing=label_smoothing),
         metrics=[
             "accuracy",
             keras.metrics.AUC(name="auc"),

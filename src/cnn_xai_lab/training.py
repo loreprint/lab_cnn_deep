@@ -21,6 +21,8 @@ class ExperimentConfig:
     dense_units: int = 128
     dropout: float = 0.30
     learning_rate: float = 1e-3
+    l2_strength: float = 1e-4
+    label_smoothing: float = 0.03
 
 
 def plot_training_curves(history_df: pd.DataFrame, output_path: Path) -> None:
@@ -64,16 +66,20 @@ def train_experiment(
         dense_units=config.dense_units,
         dropout=config.dropout,
         learning_rate=config.learning_rate,
+        l2_strength=config.l2_strength,
+        label_smoothing=config.label_smoothing,
     )
 
     callbacks = [
         keras.callbacks.EarlyStopping(
-            monitor="val_loss",
-            patience=6,
+            monitor="val_auc",
+            mode="max",
+            patience=8,
             restore_best_weights=True,
         ),
         keras.callbacks.ReduceLROnPlateau(
-            monitor="val_loss",
+            monitor="val_auc",
+            mode="max",
             factor=0.6,
             patience=3,
             min_lr=1e-5,
