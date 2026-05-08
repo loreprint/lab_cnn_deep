@@ -813,11 +813,25 @@ def run_robust_inference(
 
     if not votes:
         fallback_metrics = best_metrics or {"name": "modelo_publico", "model_path": str(MODELS_DIR / "model.keras")}
-        fallback_view = views["auto"] if views["auto_found"] else views["full"]
-        prediction, anchor_vote = run_single_inference(fallback_metrics, fallback_view)
-        anchor_vote["model_name"] = fallback_metrics.get("name", "modelo_publico")
-        votes = [anchor_vote]
-        return prediction, anchor_vote, votes
+        fallback_model = read_model(resolve_model_path(fallback_metrics))
+        fallback_vote_specs = [("auto", 0.72), ("full", 0.28)] if views["auto_found"] else [("full", 0.82), ("portrait", 0.18)]
+
+        for view_key, weight in fallback_vote_specs:
+            selected_view = views[view_key]
+            image_batch = prepare_image(selected_view["image"], image_size=IMAGE_SIZE)
+            prediction = predict_with_tta(fallback_model, image_batch)
+            votes.append(
+                {
+                    "model_name": fallback_metrics.get("name", "modelo_publico"),
+                    "view_key": view_key,
+                    "view_label": selected_view["label"],
+                    "weight": weight,
+                    "prediction": prediction,
+                    "image_batch": image_batch,
+                    "model": fallback_model,
+                    "metrics": fallback_metrics,
+                }
+            )
 
     total_weight = sum(vote["weight"] for vote in votes) or 1.0
     male_probability = sum(
@@ -1569,10 +1583,17 @@ def render_demo_tab(
 
     if inference_mode == "Robusto (ensemble)":
         metric_name = "robusto_ensemble"
+        available_checkpoint_count = sum(
+            1 for metrics in experiment_registry.values() if experiment_has_own_model_file(metrics)
+        )
         st.caption(
             f'Modelo cargado: {metric_name} | '
-            "Combina `face_crop_k5`, `compact_k5_dropout` y `wider_k5_dropout` "
-            "sobre multiples encuadres y promedia imagen original + espejo horizontal."
+            + (
+                "Combina `face_crop_k5`, `compact_k5_dropout` y `wider_k5_dropout` "
+                "sobre multiples encuadres y promedia imagen original + espejo horizontal."
+                if available_checkpoint_count >= 3
+                else "Combina multiples encuadres del mejor modelo publico y promedia imagen original + espejo horizontal."
+            )
         )
     elif demo_metrics:
         metric_name = demo_metrics.get("name", demo_metrics.get("best_experiment", "N/D"))
@@ -1677,8 +1698,14 @@ def main() -> None:
     if demo_metrics:
         st.sidebar.markdown("### Modelo activo en demo")
         if inference_mode == "Robusto (ensemble)":
+            available_checkpoint_count = sum(
+                1 for metrics in experiment_registry.values() if experiment_has_own_model_file(metrics)
+            )
             st.sidebar.write("Nombre: `robusto_ensemble`")
-            st.sidebar.write("Base: combinacion de checkpoints disponibles en el despliegue.")
+            if available_checkpoint_count >= 3:
+                st.sidebar.write("Base: combinacion de checkpoints disponibles en el despliegue.")
+            else:
+                st.sidebar.write("Base: mejor modelo publico evaluado sobre multiples encuadres.")
             st.sidebar.write("Objetivo: reducir errores extremos en imagenes externas.")
         else:
             st.sidebar.write(f'Nombre: `{demo_metrics.get("name", "N/D")}`')
